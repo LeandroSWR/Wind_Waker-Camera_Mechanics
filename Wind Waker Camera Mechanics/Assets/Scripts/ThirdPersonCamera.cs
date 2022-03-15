@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(BarsEffect))]
 public class ThirdPersonCamera : MonoBehaviour
 {
     [SerializeField] private float distanceAway;
@@ -16,6 +17,7 @@ public class ThirdPersonCamera : MonoBehaviour
     private Vector3 lookDir;
     private Vector3 targetPosition;
     private BarsEffect barEffect;
+    private CameraState camState = CameraState.Behind;
 
     // Smoothing and damping
     private Vector3 velocityCamSmooth = Vector3.zero;
@@ -24,7 +26,8 @@ public class ThirdPersonCamera : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        
+        lookDir = follow.forward;
+        barEffect = GetComponent<BarsEffect>();
     }
 
     // Update is called once per frame
@@ -78,4 +81,12 @@ public class ThirdPersonCamera : MonoBehaviour
             targetPosition = new Vector3(wallHit.point.x, targetPosition.y, wallHit.point.z);
         }
     }
+}
+
+public enum CameraState
+{
+    Behind,
+    FirstPerson,
+    Target,
+    Free
 }
