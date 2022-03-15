@@ -8,10 +8,14 @@ public class ThirdPersonCamera : MonoBehaviour
     [SerializeField] private float distanceUp;
     [SerializeField] private float smooth;
     [SerializeField] private Transform follow;
-    [SerializeField] private Vector3 offset = new Vector3(0f, 1.5f, 0f);
+
+    [SerializeField] private float widescreen = 0.2f;
+    [SerializeField] private float targetingTime = 0.5f;
+
 
     private Vector3 lookDir;
     private Vector3 targetPosition;
+    private BarsEffect barEffect;
 
     // Smoothing and damping
     private Vector3 velocityCamSmooth = Vector3.zero;
@@ -31,7 +35,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void LateUpdate()
     {
-        Vector3 characterOffset = follow.position + offset;
+        Vector3 characterOffset = follow.position + new Vector3(0f, distanceUp, 0f);
 
         // Calculate direction from camera to player, kill Y, and
         // normalize to give a valid direction with unit magnitude.
@@ -49,6 +53,7 @@ public class ThirdPersonCamera : MonoBehaviour
         Debug.DrawLine(follow.position, targetPosition, Color.magenta);
 
         // Making a smooth transition between it's current position and the position it wants to be in
+        CompensateForWalls(characterOffset);
         SmoothPosition(transform.position, targetPosition);
 
         // Make sure the camera is looking the right way
@@ -59,5 +64,18 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         // Making a smooth transition between camera's current position and the position it wants to be in
         transform.position = Vector3.SmoothDamp(fromPos, toPos, ref velocityCamSmooth, camSmoothDampTime);
+    }
+
+    private void CompensateForWalls(Vector3 fromObject)
+    {
+        Debug.DrawLine(fromObject, targetPosition, Color.cyan);
+
+        // Compensate for walls between camera
+        RaycastHit wallHit;
+        if (Physics.Linecast(fromObject, targetPosition, out wallHit))
+        {
+            Debug.DrawRay(wallHit.point, Vector3.left, Color.red);
+            targetPosition = new Vector3(wallHit.point.x, targetPosition.y, wallHit.point.z);
+        }
     }
 }

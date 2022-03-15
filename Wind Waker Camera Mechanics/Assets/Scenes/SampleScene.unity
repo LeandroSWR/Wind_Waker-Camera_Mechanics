@@ -2324,6 +2324,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   directionDampTime: 0.25
   directionSpeed: 3
+  rotationDegreePerSecond: 120
   cam: {fileID: 1687258583}
 --- !u!4 &1081064408 stripped
 Transform:
@@ -3685,11 +3686,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e1088832800eb241955d26beb36b94e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distanceAway: 5
-  distanceUp: 2
-  smooth: 3
+  distanceAway: 4
+  distanceUp: 0.9
+  smooth: 10
   follow: {fileID: 1081064408}
-  offset: {x: 0, y: 1.5, z: 0}
+  offset: {x: 0, y: 1.25, z: 0}
   camSmoothDampTime: 0.1
 --- !u!20 &1687258584
 Camera:
