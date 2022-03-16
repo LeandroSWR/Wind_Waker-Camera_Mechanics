@@ -40,23 +40,52 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         Vector3 characterOffset = follow.position + new Vector3(0f, distanceUp, 0f);
 
-        // Calculate direction from camera to player, kill Y, and
-        // normalize to give a valid direction with unit magnitude.
-        lookDir = characterOffset - transform.position;
-        lookDir.y = 0;
-        lookDir.Normalize();
-        Debug.DrawRay(transform.position, lookDir, Color.green);
+        // Determine camera state
+        if (Input.GetButton("Target"))
+        {
+            barEffect.Coverage = Mathf.SmoothStep(barEffect.Coverage, widescreen, targetingTime * Time.deltaTime);
+            camState = CameraState.Target;
+        }
+        else
+        {
+            barEffect.Coverage = Mathf.SmoothStep(barEffect.Coverage, 0f, targetingTime * Time.deltaTime);
+            camState = CameraState.Behind;
+        }
 
+        // Execute camera state
+        switch (camState)
+        {
+            case CameraState.Behind:
+                // Calculate direction from camera to player, kill Y, and
+                // normalize to give a valid direction with unit magnitude.
+                lookDir = characterOffset - transform.position;
+                lookDir.y = 0;
+                lookDir.Normalize();
+                Debug.DrawRay(transform.position, lookDir, Color.green);
 
-        // Setting the target position to be the correct offset from the follow
-        targetPosition = characterOffset + follow.up * distanceUp - lookDir * distanceAway;
+                // Setting the target position to be the correct offset from the follow
+                targetPosition = characterOffset + follow.up * distanceUp - lookDir * distanceAway;
 
-        Debug.DrawRay(follow.position, follow.up * distanceUp, Color.red);
-        Debug.DrawRay(follow.position, -1f * follow.forward * distanceAway, Color.blue);
-        Debug.DrawLine(follow.position, targetPosition, Color.magenta);
+                Debug.DrawRay(follow.position, follow.up * distanceUp, Color.red);
+                Debug.DrawRay(follow.position, -1f * follow.forward * distanceAway, Color.blue);
+                Debug.DrawLine(follow.position, targetPosition, Color.magenta);
+                break;
+            case CameraState.FirstPerson:
+                break;
+            case CameraState.Target:
+
+                targetPosition = characterOffset + follow.up * distanceUp - follow.forward * distanceAway;
+                break;
+            case CameraState.Free:
+                break;
+            default:
+                break;
+        }
+
+        // Moves the camera closer to the player when it hits a wall
+        CompensateForWalls(characterOffset);
 
         // Making a smooth transition between it's current position and the position it wants to be in
-        CompensateForWalls(characterOffset);
         SmoothPosition(transform.position, targetPosition);
 
         // Make sure the camera is looking the right way

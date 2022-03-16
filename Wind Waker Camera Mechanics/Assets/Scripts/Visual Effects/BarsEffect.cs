@@ -11,6 +11,12 @@ public class BarsEffect : MonoBehaviour
     [SerializeField] private Material material;
     [Range(0f, 1f)]
     [SerializeField] private float coverage = 0.1f;
+    public float Coverage { 
+        get => coverage;
+        set {
+            coverage = Mathf.Clamp01(value);
+        } 
+    }
     
 
     private void Update()
