@@ -13,9 +13,13 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
 
     private float direction = 0f;
-    private float speed = 0f;
     private float horizontal = 0f;
     private float vertical = 0f;
+
+    private float speed = 0f;
+    public float Speed { get => speed; }
+
+    public float LocomotionThreshold { get => 0.2f; }
 
     private AnimatorStateInfo stateInfo;
 

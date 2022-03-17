@@ -3,21 +3,25 @@ using UnityEngine;
 [RequireComponent(typeof(BarsEffect))]
 public class ThirdPersonCamera : MonoBehaviour
 {
+    [Header("Follow Mode")]
     [SerializeField] private float distanceAway;
     [SerializeField] private float distanceUp;
     [SerializeField] private float smooth;
     [SerializeField] private Transform follow;
 
+    [Header("Target Mode")]
     [SerializeField] private float widescreen = 0.2f;
     [SerializeField] private float targetingTime = 0.5f;
     
     [Header("First Person")]
     [SerializeField] private float firstPersonLookSpeed = 1.5f;
     [SerializeField] private Vector2 firstPersonXAxisClamp = new Vector2(-70f, 70f);
-    [SerializeField] private float fpsRotationDegresPerSecond = 120f;
+    [SerializeField] private float fpsRotationDegresPerSecond = 180f;
 
 
     private Vector3 lookDir;
+    private Vector3 curLookDir;
+    private Vector3 velocityLookDir;
     private Vector3 targetPosition;
     private BarsEffect barEffect;
     private CameraPosition firstPersonCamPos;
@@ -27,17 +31,18 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private float xAxisRot = 0f;
     private float lookWeight;
-    
 
     // Smoothing and damping
     private Vector3 velocityCamSmooth = Vector3.zero;
     [Header("Smooth Values")]
     [SerializeField] private float camSmoothDampTime = 0.1f;
+    [SerializeField] private float lookDirDampTime = 0.1f;
 
     // Start is called before the first frame update
     private void Start()
     {
         lookDir = follow.forward;
+        curLookDir = follow.forward;
         barEffect = GetComponent<BarsEffect>();
 
         firstPersonCamPos = new CameraPosition();
@@ -56,10 +61,10 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void LateUpdate()
     {
-        float rightX = Input.GetAxis("Horizontal");
-        float rightY = Input.GetAxis("Vertical");
-        float leftX = Input.GetAxis("Mouse X");
-        float leftY = -Input.GetAxis("Mouse Y");
+        float rightX = Input.GetAxis("Mouse X");
+        float rightY = -Input.GetAxis("Mouse Y");
+        float leftX = Input.GetAxis("Horizontal");
+        float leftY = Input.GetAxis("Vertical");
 
         Vector3 characterOffset = follow.position + new Vector3(0f, distanceUp, 0f);
         Vector3 lookAt = characterOffset;
@@ -107,24 +112,29 @@ public class ThirdPersonCamera : MonoBehaviour
             case CameraState.Behind:
                 ResetCamera();
 
-                // Calculate direction from camera to player, kill Y, and
-                // normalize to give a valid direction with unit magnitude.
-                lookDir = characterOffset - transform.position;
-                lookDir.y = 0;
-                lookDir.Normalize();
-                Debug.DrawRay(transform.position, lookDir, Color.green);
+                // Only updatecameralook direction if moving
+                if (follow.GetComponent<PlayerController>().Speed > follow.GetComponent<PlayerController>().LocomotionThreshold && follow.GetComponent<PlayerController>().IsInLocomotion())
+                {
+                    lookDir = Vector3.Lerp(follow.right * (leftX < 0 ? 1f : -1f), follow.forward * (leftY < 0 ? -1f : 1f), Mathf.Abs(Vector3.Dot(transform.forward, follow.forward)));
+                    Debug.DrawRay(transform.position, lookDir, Color.white);
+
+                    // Calculate direction from camera to player, Kill y, and normalize to give a valid direction with unit magnitude
+                    curLookDir = Vector3.Normalize(characterOffset - transform.position);
+                    curLookDir.y = 0;
+                    Debug.DrawRay(transform.position, curLookDir, Color.green);
+
+                    // Damping makes it so we don't update targetPosition while pivoting; camera shouldn't rotate around player
+                    curLookDir = Vector3.SmoothDamp(curLookDir, lookDir, ref velocityLookDir, lookDirDampTime);
+                }
 
                 // Setting the target position to be the correct offset from the follow
-                targetPosition = characterOffset + follow.up * distanceUp - lookDir * distanceAway;
-
-                Debug.DrawRay(follow.position, follow.up * distanceUp, Color.red);
-                Debug.DrawRay(follow.position, -1f * follow.forward * distanceAway, Color.blue);
+                targetPosition = characterOffset + follow.up * distanceUp - curLookDir.normalized * distanceAway;
                 Debug.DrawLine(follow.position, targetPosition, Color.magenta);
                 break;
             case CameraState.FirstPerson:
                 // Look Up and Down
                 //  Calculate the amount of rotation and apply to the firstPersonCamPos GameObject
-                xAxisRot += (leftY * firstPersonLookSpeed);
+                xAxisRot += (rightY * firstPersonLookSpeed);
                 xAxisRot = Mathf.Clamp(xAxisRot, firstPersonXAxisClamp.x, firstPersonXAxisClamp.y);
                 firstPersonCamPos.XForm.localRotation = Quaternion.Euler(xAxisRot, 0f, 0f);
 
@@ -146,7 +156,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
 
                 // Looking  left and right
-                Vector3 rotationAmout = Vector3.Lerp(Vector3.zero, new Vector3(0f, fpsRotationDegresPerSecond * (leftX < 0f ? -1f : 1f), 0f), Mathf.Abs(leftX));
+                Vector3 rotationAmout = Vector3.Lerp(Vector3.zero, new Vector3(0f, fpsRotationDegresPerSecond * (rightX < 0f ? -1f : 1f), 0f), Mathf.Abs(rightX));
                 Quaternion deltaRotation = Quaternion.Euler(rotationAmout * Time.deltaTime);
                 follow.rotation = follow.rotation * deltaRotation;
 
