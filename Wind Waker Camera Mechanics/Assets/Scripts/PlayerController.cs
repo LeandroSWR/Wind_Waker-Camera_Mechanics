@@ -34,6 +34,9 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (cam.CamState == CameraState.FirstPerson)
+            return;
+
         stateInfo = animator.GetCurrentAnimatorStateInfo(0);
 
         horizontal = Input.GetAxis("Horizontal");
@@ -86,5 +89,5 @@ public class PlayerController : MonoBehaviour
     }
 
     public bool IsInLocomotion() =>
-        stateInfo.nameHash == m_LocomotionId;
+        stateInfo.fullPathHash == m_LocomotionId;
 }
