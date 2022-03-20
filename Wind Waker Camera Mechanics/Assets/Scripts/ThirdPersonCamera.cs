@@ -102,7 +102,7 @@ public class ThirdPersonCamera : MonoBehaviour
         // Doesn't work for now
         // VVVVVVVVVV THIS NEEDS  TO BE MOVED OVER TO THE PLAYER CONTROLLER!!! VVVVVVVVVV
         // Set the Look At Weight amount to use look at IK vs using the head's animation
-        follow.GetComponent<Animator>().SetLookAtWeight(lookWeight);
+        //follow.GetComponent<Animator>().SetLookAtWeight(lookWeight);
 
 
 
@@ -112,7 +112,7 @@ public class ThirdPersonCamera : MonoBehaviour
             case CameraState.Behind:
                 ResetCamera();
 
-                // Only updatecameralook direction if moving
+                // Only update camera look direction if moving
                 if (follow.GetComponent<PlayerController>().Speed > follow.GetComponent<PlayerController>().LocomotionThreshold && follow.GetComponent<PlayerController>().IsInLocomotion())
                 {
                     lookDir = Vector3.Lerp(follow.right * (leftX < 0 ? 1f : -1f), follow.forward * (leftY < 0 ? -1f : 1f), Mathf.Abs(Vector3.Dot(transform.forward, follow.forward)));
@@ -129,6 +129,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
                 // Setting the target position to be the correct offset from the follow
                 targetPosition = characterOffset + follow.up * distanceUp - curLookDir.normalized * distanceAway;
+
                 Debug.DrawLine(follow.position, targetPosition, Color.magenta);
                 break;
             case CameraState.FirstPerson:
@@ -147,7 +148,7 @@ public class ThirdPersonCamera : MonoBehaviour
                 // Doesn't work for now
                 // VVVVVVVVVV THIS NEEDS  TO BE MOVED OVER TO THE PLAYER CONTROLLER!!! VVVVVVVVVV
                 // Move character model's head
-                follow.GetComponent<Animator>().SetLookAtPosition(firstPersonCamPos.XForm.position + firstPersonCamPos.XForm.forward);
+                //follow.GetComponent<Animator>().SetLookAtPosition(firstPersonCamPos.XForm.position + firstPersonCamPos.XForm.forward);
                 // Update the weight of the lookAt
                 lookWeight = Mathf.Lerp(lookWeight, 1f, Time.deltaTime * firstPersonLookSpeed);
                 // AAAAAAAAAA THIS NEEDS  TO BE MOVED OVER TO THE PLAYER CONTROLLER!!! AAAAAAAAAA
@@ -172,6 +173,9 @@ public class ThirdPersonCamera : MonoBehaviour
                 break;
             case CameraState.Target:
                 ResetCamera();
+
+                // So the behind state doesn't reset my position
+                curLookDir = follow.forward;
 
                 // Setting the target position
                 targetPosition = characterOffset + follow.up * distanceUp - follow.forward * distanceAway;

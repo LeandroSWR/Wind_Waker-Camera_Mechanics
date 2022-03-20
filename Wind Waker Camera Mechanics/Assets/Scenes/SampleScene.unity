@@ -2323,8 +2323,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   directionDampTime: 0.25
+  speedDampTime: 0.05
   directionSpeed: 3
-  rotationDegreePerSecond: 120
+  rotationDegreePerSecond: 180
   cam: {fileID: 1687258583}
 --- !u!4 &1081064408 stripped
 Transform:
@@ -3766,7 +3767,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1666927696
 Transform:
   m_ObjectHideFlags: 0
@@ -3864,14 +3865,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   distanceAway: 4
   distanceUp: 0.9
-  smooth: 10
+  smooth: 5
   follow: {fileID: 1081064408}
   widescreen: 0.2
   targetingTime: 40
   firstPersonLookSpeed: 1.5
   firstPersonXAxisClamp: {x: -70, y: 70}
   fpsRotationDegresPerSecond: 180
-  camSmoothDampTime: 0.1
+  camSmoothDampTime: 0.15
+  lookDirDampTime: 0.05
 --- !u!20 &1687258584
 Camera:
   m_ObjectHideFlags: 0
